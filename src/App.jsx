@@ -220,7 +220,9 @@ export default function TheOar() {
   };
 
   // ── Computed ──
-  const fastGoal = getFastGoal(activeFast?.startTime, settings.weekdayHours, settings.weekendHours);
+  const fastGoal = activeFast
+    ? (parseFloat(activeFast.goalHours) || getFastGoal(activeFast.startTime, settings.weekdayHours, settings.weekendHours))
+    : getFastGoal(null, settings.weekdayHours, settings.weekendHours);
   const fastElapsed = activeFast ? Date.now() - activeFast.startTime : 0;
   const fastPct = activeFast ? Math.min((fastElapsed / (fastGoal * 3600000)) * 100, 100) : 0;
   const fastDone = fastPct >= 100;
@@ -341,6 +343,11 @@ export default function TheOar() {
     setActiveFast(prev => ({ ...prev, startTime: newTimestamp }));
   };
 
+  const updateFastGoalHours = async (goalHours) => {
+    await supabase.from("fasts").update({ goal_hours: goalHours }).eq("id", activeFast.id);
+    setActiveFast(prev => ({ ...prev, goalHours }));
+  };
+
   const updateSettings = async (key, value) => {
     const keyMap = {
       calorieGoal: "calorie_goal",
@@ -435,7 +442,7 @@ export default function TheOar() {
         <div style={S.content}>
           {tab === "Dashboard" && <Dashboard settings={settings} todayCals={todayCals} todayProtein={todayProtein} todayFat={todayFat} todayCarbs={todayCarbs} weekMeters={weekMeters} fastElapsed={fastElapsed} fastGoal={fastGoal} fastPct={fastPct} fastDone={fastDone} activeFast={activeFast} rows={rows} setTab={setTab} todayWater={todayWater} addWater={addWater} />}
           {tab === "Row" && <RowLog rows={rows} addRow={addRow} updateRow={updateRow} deleteRow={deleteRow} />}
-          {tab === "Fast" && <FastTracker activeFast={activeFast} fasts={fasts} fastElapsed={fastElapsed} fastGoal={fastGoal} fastPct={fastPct} fastDone={fastDone} startFast={startFast} endFast={endFast} updateFastStartTime={updateFastStartTime} updateFast={updateFast} deleteFast={deleteFast} />}
+          {tab === "Fast" && <FastTracker activeFast={activeFast} fasts={fasts} fastElapsed={fastElapsed} fastGoal={fastGoal} fastPct={fastPct} fastDone={fastDone} startFast={startFast} endFast={endFast} updateFastStartTime={updateFastStartTime} updateFastGoalHours={updateFastGoalHours} updateFast={updateFast} deleteFast={deleteFast} />}
           {tab === "Food" && <FoodLog foodLogs={foodLogs} settings={settings} todayCals={todayCals} todayProtein={todayProtein} todayFat={todayFat} todayCarbs={todayCarbs} addFood={addFood} todayWater={todayWater} addWater={addWater} updateFood={updateFood} deleteFood={deleteFood} waterLogs={waterLogs} updateWater={updateWater} deleteWater={deleteWater} />}
           {tab === "Trends" && <Trends rows={rows} fasts={fasts} foodLogs={foodLogs} settings={settings} activeFast={activeFast} waterLogs={waterLogs} />}
           {tab === "Settings" && <SettingsScreen settings={settings} updateSettings={updateSettings} signOut={signOut} />}
@@ -484,7 +491,7 @@ function Dashboard({ settings, todayCals, todayProtein, todayFat, todayCarbs, we
             <div style={S.bigNum}>{formatDuration(fastElapsed)}</div>
             <div style={S.fastTimeRow}>
               <span>🕐 Started {new Date(activeFast.startTime).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}</span>
-              <span>🏁 Ends {new Date(activeFast.startTime + fastGoal * 3600000).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}</span>
+              <span>🏁 Ends {(() => { const e = new Date(activeFast.startTime + fastGoal * 3600000); const isToday = e.toDateString() === new Date().toDateString(); const t = e.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }); return isToday ? t : e.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }) + " " + t; })()}</span>
             </div>
             <div style={S.cardSub}>{fastDone ? "🎯 Goal reached!" : `${(fastGoal - fastElapsed / 3600000).toFixed(1)}h remaining`}</div>
             <ProgressBar pct={fastPct} color={fastDone ? "#4ade80" : "#f59e0b"} />
@@ -643,7 +650,7 @@ function RowLog({ rows, addRow, updateRow, deleteRow }) {
   );
 }
 
-function FastTracker({ activeFast, fasts, fastElapsed, fastGoal, fastPct, fastDone, startFast, endFast, updateFastStartTime, updateFast, deleteFast }) {
+function FastTracker({ activeFast, fasts, fastElapsed, fastGoal, fastPct, fastDone, startFast, endFast, updateFastStartTime, updateFastGoalHours, updateFast, deleteFast }) {
   const [starting, setStarting] = useState(false);
   const [ending, setEnding] = useState(false);
   const [editFast, setEditFast] = useState(null);
@@ -683,6 +690,18 @@ function FastTracker({ activeFast, fasts, fastElapsed, fastGoal, fastPct, fastDo
     const d = new Date(activeFast.startTime);
     d.setHours(h, m, 0, 0);
     updateFastStartTime(d.getTime());
+  };
+
+  const toDateTimeLocal = (ts) => {
+    const d = new Date(ts);
+    const pad = n => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  };
+
+  const handleEndTimeChange = (e) => {
+    const newEndTs = new Date(e.target.value).getTime();
+    const newGoalHours = (newEndTs - activeFast.startTime) / 3600000;
+    if (newGoalHours > 0) updateFastGoalHours(newGoalHours);
   };
 
   const openEditFast = (f) => setEditFast({
@@ -748,7 +767,7 @@ function FastTracker({ activeFast, fasts, fastElapsed, fastGoal, fastPct, fastDo
         <div style={S.card}>
           <div style={S.cardHeader}>
             <span style={S.cardLabel}>TARGET TODAY</span>
-            <span style={S.cardLabelRight}>{fastGoal}:00 · {isWeekend() ? "Weekend" : "Weekday"}</span>
+            <span style={S.cardLabelRight}>{Number.isInteger(fastGoal) ? `${fastGoal}:00` : `${fastGoal.toFixed(1)}h`} · {isWeekend() ? "Weekend" : "Weekday"}</span>
           </div>
           {activeFast ? (
             <>
@@ -765,7 +784,15 @@ function FastTracker({ activeFast, fasts, fastElapsed, fastGoal, fastPct, fastDo
                     style={S.fastTimeInput}
                   />
                 </span>
-                <span>🏁 Ends {new Date(activeFast.startTime + fastGoal * 3600000).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}</span>
+                <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  🏁 Ends
+                  <input
+                    type="datetime-local"
+                    value={toDateTimeLocal(activeFast.startTime + fastGoal * 3600000)}
+                    onChange={handleEndTimeChange}
+                    style={{ ...S.fastTimeInput, colorScheme: "dark" }}
+                  />
+                </span>
               </div>
               <div style={{ ...S.cardSub, textAlign: "center", marginBottom: 12 }}>
                 {fastDone ? "🎯 Goal reached!" : `${((fastGoal * 3600000 - fastElapsed) / 3600000).toFixed(1)}h remaining`}
