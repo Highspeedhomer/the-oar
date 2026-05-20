@@ -31,6 +31,7 @@ const ROUTINES = [
         reps: "10-12",
         targetMuscle: "Shoulder Cap",
         instructions: "Hold dumbbells at shoulder height. Press up overhead until arms are straight. Lower with control.",
+        imageUrl: "/the-oar/workouts/shoulder_press.png",
         videoUrl: "https://www.youtube.com/watch?v=B-aVuyhvLHU"
       },
       {
@@ -40,6 +41,7 @@ const ROUTINES = [
         reps: "12-15",
         targetMuscle: "Pecs",
         instructions: "Lie on floor, dumbbells over chest. Open arms wide with slight bend in elbows. Squeeze chest to bring back up.",
+        imageUrl: "/the-oar/workouts/chest_flys.png",
         videoUrl: "https://www.youtube.com/watch?v=ajdFwbK2Gu4"
       },
       {
@@ -49,6 +51,7 @@ const ROUTINES = [
         reps: "12-15",
         targetMuscle: "Shoulder Cap",
         instructions: "Hold dumbbells at sides. Raise arms out to shoulder height. Lower with control.",
+        imageUrl: "/the-oar/workouts/lateral_raises.png",
         videoUrl: "https://www.youtube.com/watch?v=3VcKaXtokW8"
       },
       {
@@ -58,6 +61,7 @@ const ROUTINES = [
         reps: "12-15",
         targetMuscle: "Triceps",
         instructions: "Hold one dumbbell with both hands. Extend arms overhead. Lower behind head, then extend.",
+        imageUrl: "/the-oar/workouts/tricep_extension.png",
         videoUrl: "https://www.youtube.com/watch?v=nRiJVZD5a04"
       },
       {
@@ -67,6 +71,7 @@ const ROUTINES = [
         reps: "AMRAP",
         targetMuscle: "Pecs / Shoulders / Triceps",
         instructions: "Level 1: Wall, Level 2: Incline, Level 3: Knee, Level 4: Regular. Perform as many repetitions as possible with control. Stop 1-2 reps before failure.",
+        imageUrl: "/the-oar/workouts/push_up.png",
         videoUrl: "https://www.youtube.com/watch?v=y3ZstA4nO-M"
       }
     ]
@@ -87,6 +92,7 @@ const ROUTINES = [
         reps: "10-15",
         targetMuscle: "Biceps / Forearms",
         instructions: "Hold dumbbells with neutral grip. Curl up, keeping palms facing in. Lower with control.",
+        imageUrl: "/the-oar/workouts/hammer_curl.png",
         videoUrl: "https://www.youtube.com/watch?v=zC3nLlEvin4"
       },
       {
@@ -96,6 +102,7 @@ const ROUTINES = [
         reps: "12-15",
         targetMuscle: "Biceps",
         instructions: "Hold dumbbells with palms forward. Curl up, squeeze biceps. Lower slowly.",
+        imageUrl: "/the-oar/workouts/bicep_curl.png",
         videoUrl: "https://www.youtube.com/watch?v=ykJmrZ5v0Oo"
       },
       {
@@ -105,6 +112,7 @@ const ROUTINES = [
         reps: "10-12",
         targetMuscle: "Shoulders",
         instructions: "Start with palms facing you. Press up while rotating palms out. Lower and repeat.",
+        imageUrl: "/the-oar/workouts/arnold_press.png",
         videoUrl: "https://www.youtube.com/watch?v=6PG1HPhaj2M"
       },
       {
@@ -114,6 +122,7 @@ const ROUTINES = [
         reps: "12",
         targetMuscle: "Shoulders / Traps",
         instructions: "Hold dumbbells in front of thighs. Pull up close to body, elbows high. Lower with control.",
+        imageUrl: "/the-oar/workouts/upright_row.png",
         videoUrl: "https://www.youtube.com/watch?v=jaAV-rD45I0"
       },
       {
@@ -123,6 +132,7 @@ const ROUTINES = [
         reps: "12-15",
         targetMuscle: "Front Shoulders",
         instructions: "Hold dumbbells in front of thighs. Raise to shoulder height. Lower with control.",
+        imageUrl: "/the-oar/workouts/front_raise.png",
         videoUrl: "https://www.youtube.com/watch?v=sOwsG8W1Z1Y"
       },
       {
@@ -132,6 +142,7 @@ const ROUTINES = [
         reps: "15",
         targetMuscle: "Shoulders / Hips / Upper Back",
         instructions: "Hold kettlebell with both hands. Pull up to chest height, elbows high. Lower with control.",
+        imageUrl: "/the-oar/workouts/kettlebell_high_pull.png",
         videoUrl: "https://www.youtube.com/watch?v=8lJmB0m2sE0"
       }
     ]
@@ -172,6 +183,7 @@ const ROUTINES = [
         reps: "10",
         targetMuscle: "Quads / Glutes",
         instructions: "Stand about two feet in front of a bench/chair. Extend one leg back and place the top of your foot on the bench. Lower your hips until your rear knee is near the floor, then press back up.",
+        imageUrl: "/the-oar/workouts/bulgarian_split_squat.png",
         videoUrl: "https://www.youtube.com/watch?v=2C-uNgKwPLE"
       },
       {
@@ -181,6 +193,7 @@ const ROUTINES = [
         reps: "15",
         targetMuscle: "Calves",
         instructions: "Hold dumbbells at your sides. Stand tall, and raise up onto the balls of your feet. Hold briefly at the top, then slowly lower back down.",
+        imageUrl: "/the-oar/workouts/calf_raise.png",
         videoUrl: "https://www.youtube.com/watch?v=-M4-G8p8fmc"
       },
       {
@@ -190,6 +203,7 @@ const ROUTINES = [
         reps: "15",
         targetMuscle: "Glutes / Lower Back",
         instructions: "Lie on your back, knees bent, feet flat. Place a dumbbell or kettlebell on your hips. Drive through your heels to raise your hips until knees, hips, and shoulders align. Squeeze glutes and lower.",
+        imageUrl: "/the-oar/workouts/glute_bridge.png",
         videoUrl: "https://www.youtube.com/watch?v=wPM8co451BE"
       }
     ]
@@ -230,6 +244,7 @@ const ROUTINES = [
         reps: "12",
         targetMuscle: "Core stability / Shoulders",
         instructions: "Start in a high plank position with a dumbbell on the floor behind one hand. Reach under your body with the opposite hand, grab the weight, and pull it across. Repeat on the other side.",
+        imageUrl: "/the-oar/workouts/plank_pull_through.png",
         videoUrl: "https://www.youtube.com/watch?v=EGrP0uO2-w8"
       },
       {
@@ -239,6 +254,7 @@ const ROUTINES = [
         reps: "45s",
         targetMuscle: "Lower Abs",
         instructions: "Lie flat on your back, hands under glutes. Lift feet 6 inches off the floor. Keep legs straight and flutter them up and down in a small, controlled motion.",
+        imageUrl: "/the-oar/workouts/flutter_kick.png",
         videoUrl: "https://www.youtube.com/watch?v=ANVdMDaYRts"
       },
       {
@@ -248,6 +264,7 @@ const ROUTINES = [
         reps: "12",
         targetMuscle: "Lower Abs",
         instructions: "Lie flat on your back, legs straight. Keep hands at sides or under glutes. Slowly raise legs until they are vertical, then slowly lower them without letting them touch the floor.",
+        imageUrl: "/the-oar/workouts/leg_raise.png",
         videoUrl: "https://www.youtube.com/watch?v=l4kQd9eWclE"
       }
     ]
@@ -1051,28 +1068,6 @@ export default function WorkoutsScreen({ user, supabase, setSyncLocal, workoutLo
                                   alt={ex.name}
                                 />
                               )}
-                              {ex.videoUrl && (
-                                <div style={{ marginTop: 8 }}>
-                                  <a
-                                    href={ex.videoUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    style={{
-                                      display: "inline-block",
-                                      background: "#1e293b",
-                                      border: "1px solid #475569",
-                                      borderRadius: 6,
-                                      padding: "4px 10px",
-                                      color: "#38bdf8",
-                                      fontSize: "0.72rem",
-                                      textDecoration: "none",
-                                      fontWeight: 700
-                                    }}
-                                  >
-                                    🎬 Watch Video Guide
-                                  </a>
-                                </div>
-                              )}
                             </div>
                           )}
                         </div>
@@ -1145,28 +1140,6 @@ export default function WorkoutsScreen({ user, supabase, setSyncLocal, workoutLo
                       }}
                       alt={ex.name}
                     />
-                  )}
-                  {activeWorkout.exercises[exIdx].videoUrl && (
-                    <div style={{ marginTop: 8 }}>
-                      <a
-                        href={activeWorkout.exercises[exIdx].videoUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{
-                          display: "inline-block",
-                          background: "#1e293b",
-                          border: "1px solid #475569",
-                          borderRadius: 6,
-                          padding: "5px 12px",
-                          color: "#38bdf8",
-                          fontSize: "0.75rem",
-                          textDecoration: "none",
-                          fontWeight: 700
-                        }}
-                      >
-                        🎬 Watch Video Guide
-                      </a>
-                    </div>
                   )}
                 </div>
 
