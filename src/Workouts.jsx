@@ -66,12 +66,32 @@ const ROUTINES = [
       },
       {
         id: "a6",
-        name: "Push-up Progression (Level Choice)",
+        name: "Incline Push-ups",
+        sets: 3,
+        reps: "AMRAP",
+        targetMuscle: "Pecs / Lower Chest",
+        instructions: "Place hands on an elevated surface like a bench or sturdy chair. Keep body straight and perform push-ups.",
+        imageUrl: "/the-oar/workouts/push_up_incline.png",
+        videoUrl: ""
+      },
+      {
+        id: "a7",
+        name: "Knee Push-ups",
         sets: 3,
         reps: "AMRAP",
         targetMuscle: "Pecs / Shoulders / Triceps",
-        instructions: "Level 1: Wall, Level 2: Incline, Level 3: Knee, Level 4: Regular. Perform as many repetitions as possible with control. Stop 1-2 reps before failure.",
-        imageUrl: "/the-oar/workouts/push_up.png",
+        instructions: "Rest on your knees instead of toes. Keep a straight line from knees to head.",
+        imageUrl: "/the-oar/workouts/push_up_knee.png",
+        videoUrl: ""
+      },
+      {
+        id: "a8",
+        name: "Full Push-ups",
+        sets: 3,
+        reps: "AMRAP",
+        targetMuscle: "Pecs / Shoulders / Triceps",
+        instructions: "Standard push-ups on toes. Keep core tight and lower until chest is near the floor.",
+        imageUrl: "/the-oar/workouts/push_up_full.png",
         videoUrl: "https://www.youtube.com/watch?v=y3ZstA4nO-M"
       }
     ]
