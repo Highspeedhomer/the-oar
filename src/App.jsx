@@ -9,7 +9,7 @@ import SettingsScreen from "./components/SettingsScreen";
 import WorkoutsScreen from "./Workouts";
 import Spinner from "./components/ui/Spinner";
 import { S, css } from "./components/styles";
-import { todayStr, getFastGoal, formatDuration, formatMeters } from "./components/utils";
+import { todayStr, getFastGoal } from "./components/utils";
 
 // ─── SUPABASE CLIENT ──────────────────────────────────────────────────────────
 const supabase = createClient(
@@ -41,6 +41,7 @@ export default function TheOar() {
   const [authState, setAuthState] = useState("idle"); // idle | signing_in | loading | ready | error
   const [user, setUser] = useState(null);
   const [tab, setTab] = useState("Dashboard");
+  // eslint-disable-next-line no-unused-vars
   const [tick, setTick] = useState(0);
   const [error, setError] = useState(null);
 

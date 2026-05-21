@@ -52,13 +52,6 @@ export default function FastTracker({
     return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
   };
 
-  const dateTimeToTs = (dateStr, timeStr) => {
-    const [h, m] = timeStr.split(":").map(Number);
-    const d = new Date(dateStr + "T12:00:00"); // avoid timezone shifting issues
-    d.setHours(h, m, 0, 0);
-    return d.getTime();
-  };
-
   const handleStart = async () => {
     setStarting(true);
     const [h, m] = customStartInput.split(":").map(Number);

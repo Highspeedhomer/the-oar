@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { S } from "./components/styles";
-import { todayStr, formatDuration } from "./components/utils";
+import { todayStr } from "./components/utils";
 import ProgressBar from "./components/ui/ProgressBar";
 
 // ─── INITIAL WORKOUT ROUTINES ──────────────────────────────────────────────────
@@ -377,6 +377,7 @@ export default function WorkoutsScreen({ user, supabase, setSyncLocal, workoutLo
       stopActiveTimer();
       stopRestTimer();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
   const wakeLockRef = useRef(null);

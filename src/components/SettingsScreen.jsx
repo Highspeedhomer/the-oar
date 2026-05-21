@@ -1,6 +1,22 @@
 import { useState } from "react";
 import { S } from "./styles";
 
+const Field = ({ label, settingsKey, value, saving, handleChange }) => (
+  <div style={S.inputGroup}>
+    <label style={S.inputLabel}>{label}</label>
+    <input
+      style={{ ...S.input, opacity: saving[settingsKey] ? 0.5 : 1 }}
+      type="number"
+      inputMode="numeric"
+      defaultValue={value}
+      onBlur={(e) => {
+        const v = parseInt(e.target.value, 10);
+        if (!isNaN(v) && v > 0) handleChange(settingsKey, v);
+      }}
+    />
+  </div>
+);
+
 export default function SettingsScreen({
   settings,
   updateSettings,
@@ -24,22 +40,6 @@ export default function SettingsScreen({
     await updateSettings(key, value);
     setSaving((p) => ({ ...p, [key]: false }));
   };
-
-  const Field = ({ label, settingsKey, value }) => (
-    <div style={S.inputGroup}>
-      <label style={S.inputLabel}>{label}</label>
-      <input
-        style={{ ...S.input, opacity: saving[settingsKey] ? 0.5 : 1 }}
-        type="number"
-        inputMode="numeric"
-        defaultValue={value}
-        onBlur={(e) => {
-          const v = parseInt(e.target.value, 10);
-          if (!isNaN(v) && v > 0) handleChange(settingsKey, v);
-        }}
-      />
-    </div>
-  );
 
   return (
     <div style={S.screen}>
@@ -85,31 +85,31 @@ export default function SettingsScreen({
       <div style={S.card}>
         <div style={S.cardLabel}>CALORIES</div>
         <div style={{ marginTop: 12 }}>
-          <Field label="DAILY CALORIE GOAL (kcal)" settingsKey="calorieGoal" value={settings.calorieGoal} />
+          <Field label="DAILY CALORIE GOAL (kcal)" settingsKey="calorieGoal" value={settings.calorieGoal} saving={saving} handleChange={handleChange} />
         </div>
       </div>
 
       <div style={S.card}>
         <div style={S.cardLabel}>MACROS</div>
         <div style={{ marginTop: 12 }}>
-          <Field label="PROTEIN GOAL (g)" settingsKey="proteinGoal" value={settings.macroGoals.protein} />
-          <Field label="FAT GOAL (g)" settingsKey="fatGoal" value={settings.macroGoals.fat} />
-          <Field label="CARBS GOAL (g)" settingsKey="carbsGoal" value={settings.macroGoals.carbs} />
+          <Field label="PROTEIN GOAL (g)" settingsKey="proteinGoal" value={settings.macroGoals.protein} saving={saving} handleChange={handleChange} />
+          <Field label="FAT GOAL (g)" settingsKey="fatGoal" value={settings.macroGoals.fat} saving={saving} handleChange={handleChange} />
+          <Field label="CARBS GOAL (g)" settingsKey="carbsGoal" value={settings.macroGoals.carbs} saving={saving} handleChange={handleChange} />
         </div>
       </div>
 
       <div style={S.card}>
         <div style={S.cardLabel}>💧 WATER</div>
         <div style={{ marginTop: 12 }}>
-          <Field label="DAILY WATER GOAL (oz)" settingsKey="waterGoal" value={settings.waterGoal || 100} />
+          <Field label="DAILY WATER GOAL (oz)" settingsKey="waterGoal" value={settings.waterGoal || 100} saving={saving} handleChange={handleChange} />
         </div>
       </div>
 
       <div style={S.card}>
         <div style={S.cardLabel}>🔥 FASTING</div>
         <div style={{ marginTop: 12 }}>
-          <Field label="WEEKDAY FAST HOURS" settingsKey="weekdayFastHours" value={settings.weekdayHours} />
-          <Field label="WEEKEND FAST HOURS" settingsKey="weekendFastHours" value={settings.weekendHours} />
+          <Field label="WEEKDAY FAST HOURS" settingsKey="weekdayFastHours" value={settings.weekdayHours} saving={saving} handleChange={handleChange} />
+          <Field label="WEEKEND FAST HOURS" settingsKey="weekendFastHours" value={settings.weekendHours} saving={saving} handleChange={handleChange} />
         </div>
       </div>
 

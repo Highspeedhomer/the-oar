@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { S } from "./styles";
-import { todayStr, formatMeters } from "./utils";
+import { todayStr } from "./utils";
 
 export default function RowLog({ rows, addRow, updateRow, deleteRow }) {
   const [meters, setMeters] = useState("");
