@@ -379,15 +379,94 @@ export default function WorkoutsScreen({ user, supabase, setSyncLocal, workoutLo
     };
   }, [user?.id]);
 
-  // Run live timer for active workout
+  const wakeLockRef = useRef(null);
+
+  const requestWakeLock = async () => {
+    if (!('wakeLock' in navigator)) return;
+    try {
+      if (wakeLockRef.current) return;
+      const lock = await navigator.wakeLock.request('screen');
+      wakeLockRef.current = lock;
+      console.log("Screen Wake Lock acquired.");
+      
+      lock.addEventListener('release', () => {
+        console.log("Screen Wake Lock released.");
+        wakeLockRef.current = null;
+      });
+    } catch (err) {
+      console.warn("Failed to request wake lock:", err);
+    }
+  };
+
+  const releaseWakeLock = async () => {
+    if (wakeLockRef.current) {
+      try {
+        await wakeLockRef.current.release();
+        wakeLockRef.current = null;
+      } catch (err) {
+        console.error("Failed to release wake lock:", err);
+      }
+    }
+  };
+
+  // Restore workout session on mount/user load
+  useEffect(() => {
+    if (user?.id) {
+      const savedSession = localStorage.getItem(`active_workout_session_${user.id}`);
+      if (savedSession) {
+        try {
+          const parsed = JSON.parse(savedSession);
+          if (parsed && parsed.activeWorkout && parsed.loggedWorkout) {
+            setActiveWorkout(parsed.activeWorkout);
+            setLoggedWorkout(parsed.loggedWorkout);
+            setActiveSessionTime(parsed.activeSessionTime || 0);
+            setSubTab("active");
+          }
+        } catch (e) {
+          console.error("Failed to restore workout session:", e);
+        }
+      }
+    }
+  }, [user?.id]);
+
+  // Auto-save active workout session in real-time
+  useEffect(() => {
+    if (user?.id && subTab === "active" && activeWorkout && loggedWorkout) {
+      const sessionData = {
+        activeWorkout,
+        loggedWorkout,
+        activeSessionTime
+      };
+      localStorage.setItem(`active_workout_session_${user.id}`, JSON.stringify(sessionData));
+    }
+  }, [user?.id, subTab, activeWorkout, loggedWorkout, activeSessionTime]);
+
+  // Run live timer for active workout & Screen Wake Lock
   useEffect(() => {
     if (subTab === "active" && activeWorkout) {
-      setActiveSessionTime(0);
-      timerIntervalRef.current = setInterval(() => {
-        setActiveSessionTime((t) => t + 1);
-      }, 1000);
+      if (!timerIntervalRef.current) {
+        timerIntervalRef.current = setInterval(() => {
+          setActiveSessionTime((t) => t + 1);
+        }, 1000);
+      }
+      
+      requestWakeLock();
+      
+      const handleVisibilityChange = async () => {
+        if (document.visibilityState === 'visible') {
+          await requestWakeLock();
+        }
+      };
+      
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+      return () => {
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+        releaseWakeLock();
+        stopActiveTimer();
+      };
     } else {
       stopActiveTimer();
+      releaseWakeLock();
     }
   }, [subTab, activeWorkout]);
 
@@ -399,6 +478,12 @@ export default function WorkoutsScreen({ user, supabase, setSyncLocal, workoutLo
   };
 
   const stopRestTimer = () => {
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage({
+        type: "CANCEL_ALERT",
+        id: "rest-timer"
+      });
+    }
     if (restIntervalRef.current) {
       clearInterval(restIntervalRef.current);
       restIntervalRef.current = null;
@@ -408,6 +493,19 @@ export default function WorkoutsScreen({ user, supabase, setSyncLocal, workoutLo
   // REST TIMER IMPLEMENTATION
   const triggerRestTimer = (seconds, curEx, nextEx) => {
     stopRestTimer();
+    
+    if ("Notification" in window && Notification.permission === "granted") {
+      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({
+          type: "SCHEDULE_ALERT",
+          id: "rest-timer",
+          title: "Rest Over! 💪",
+          body: `Up next: ${nextEx || 'your next set'}`,
+          delayMs: seconds * 1000
+        });
+      }
+    }
+
     setRestTimer({
       secondsLeft: seconds,
       initial: seconds,
@@ -526,6 +624,7 @@ export default function WorkoutsScreen({ user, supabase, setSyncLocal, workoutLo
     
     setLoggedWorkout(initialLog);
     setActiveWorkout(routine);
+    setActiveSessionTime(0);
     setSubTab("active");
   };
 
@@ -607,6 +706,9 @@ export default function WorkoutsScreen({ user, supabase, setSyncLocal, workoutLo
     };
 
     await addWorkoutLog(finishedLog);
+    if (user?.id) {
+      localStorage.removeItem(`active_workout_session_${user.id}`);
+    }
     setActiveWorkout(null);
     setLoggedWorkout(null);
     setSubTab("history");
@@ -617,6 +719,9 @@ export default function WorkoutsScreen({ user, supabase, setSyncLocal, workoutLo
       stopActiveTimer();
       stopRestTimer();
       setRestTimer(null);
+      if (user?.id) {
+        localStorage.removeItem(`active_workout_session_${user.id}`);
+      }
       setActiveWorkout(null);
       setLoggedWorkout(null);
       setSubTab("library");

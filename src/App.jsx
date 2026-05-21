@@ -246,6 +246,41 @@ export default function TheOar() {
     }
   };
 
+  // Auto-schedule Fast Goal completion notification in Service Worker
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      if (activeFast) {
+        const goalHours = parseFloat(activeFast.goalHours) || getFastGoal(activeFast.startTime, settings.weekdayHours, settings.weekendHours);
+        const targetTime = activeFast.startTime + (goalHours * 3600000);
+        const delayMs = targetTime - Date.now();
+
+        if (delayMs > 0 && "Notification" in window && Notification.permission === "granted") {
+          navigator.serviceWorker.ready.then((reg) => {
+            if (reg.active) {
+              reg.active.postMessage({
+                type: "SCHEDULE_ALERT",
+                id: "fast-complete",
+                title: "Fast Complete! 🌊",
+                body: `Congratulations! You hit your fasting goal of ${goalHours} hours!`,
+                delayMs
+              });
+            }
+          });
+        }
+      } else {
+        // Cancel notification if no active fast
+        navigator.serviceWorker.ready.then((reg) => {
+          if (reg.active) {
+            reg.active.postMessage({
+              type: "CANCEL_ALERT",
+              id: "fast-complete"
+            });
+          }
+        });
+      }
+    }
+  }, [activeFast, settings.weekdayHours, settings.weekendHours]);
+
   // ── Computed ──
   const fastGoal = activeFast
     ? parseFloat(activeFast.goalHours) || getFastGoal(activeFast.startTime, settings.weekdayHours, settings.weekendHours)

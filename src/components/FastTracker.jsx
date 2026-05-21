@@ -97,17 +97,24 @@ export default function FastTracker({
   const openEditFast = (f) =>
     setEditFast({
       ...f,
-      startTimeStr: tsToTimeStr(f.startTime),
-      endTimeStr: tsToTimeStr(f.endTime),
+      startDateTime: toDateTimeLocal(f.startTime),
+      endDateTime: toDateTimeLocal(f.endTime),
       goalHoursStr: String(f.goalHours),
     });
 
   const handleSaveFast = async () => {
-    const newStartTime = dateTimeToTs(editFast.date, editFast.startTimeStr);
-    const newEndTime = dateTimeToTs(editFast.date, editFast.endTimeStr);
+    const startD = new Date(editFast.startDateTime);
+    const newStartTime = startD.getTime();
+    const newEndTime = new Date(editFast.endDateTime).getTime();
+    
+    // Derive correct database date column from start date
+    const pad = (n) => String(n).padStart(2, "0");
+    const newDateStr = `${startD.getFullYear()}-${pad(startD.getMonth() + 1)}-${pad(startD.getDate())}`;
+
     setModalSaving(true);
     await updateFast({
       ...editFast,
+      date: newDateStr,
       start_time: newStartTime,
       end_time: newEndTime,
       goal_hours: parseInt(editFast.goalHoursStr, 10) || editFast.goalHours,
@@ -133,33 +140,22 @@ export default function FastTracker({
           <div style={S.modal} onClick={(e) => e.stopPropagation()}>
             <div style={S.modalTitle}>EDIT FAST</div>
             <div style={S.inputGroup}>
-              <label style={S.inputLabel}>DATE</label>
+              <label style={S.inputLabel}>START DATE & TIME</label>
               <input
                 style={{ ...S.input, colorScheme: "dark" }}
-                type="date"
-                value={editFast.date}
-                onChange={(e) => setEditFast((p) => ({ ...p, date: e.target.value }))}
+                type="datetime-local"
+                value={editFast.startDateTime}
+                onChange={(e) => setEditFast((p) => ({ ...p, startDateTime: e.target.value }))}
               />
             </div>
-            <div style={S.twoCol}>
-              <div style={S.inputGroup}>
-                <label style={S.inputLabel}>START TIME</label>
-                <input
-                  style={{ ...S.input, colorScheme: "dark" }}
-                  type="time"
-                  value={editFast.startTimeStr}
-                  onChange={(e) => setEditFast((p) => ({ ...p, startTimeStr: e.target.value }))}
-                />
-              </div>
-              <div style={S.inputGroup}>
-                <label style={S.inputLabel}>END TIME</label>
-                <input
-                  style={{ ...S.input, colorScheme: "dark" }}
-                  type="time"
-                  value={editFast.endTimeStr}
-                  onChange={(e) => setEditFast((p) => ({ ...p, endTimeStr: e.target.value }))}
-                />
-              </div>
+            <div style={S.inputGroup}>
+              <label style={S.inputLabel}>END DATE & TIME</label>
+              <input
+                style={{ ...S.input, colorScheme: "dark" }}
+                type="datetime-local"
+                value={editFast.endDateTime}
+                onChange={(e) => setEditFast((p) => ({ ...p, endDateTime: e.target.value }))}
+              />
             </div>
             <div style={S.inputGroup}>
               <label style={S.inputLabel}>GOAL HOURS</label>

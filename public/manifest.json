@@ -1,0 +1,21 @@
+{
+  "short_name": "The Oar",
+  "name": "The Oar Fitness Tracker",
+  "icons": [
+    {
+      "src": "the_oar_app_icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any"
+    },
+    {
+      "src": "the_oar_app_icon.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/the-oar/",
+  "background_color": "#09090b",
+  "theme_color": "#0f0f11",
+  "display": "standalone",
+  "orientation": "portrait"
+}

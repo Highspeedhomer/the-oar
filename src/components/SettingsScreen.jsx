@@ -8,6 +8,16 @@ export default function SettingsScreen({
   workoutsSyncLocal = false, // Pass sync status
 }) {
   const [saving, setSaving] = useState({});
+  const [notificationStatus, setNotificationStatus] = useState(() => {
+    if (!("Notification" in window)) return "unsupported";
+    return Notification.permission;
+  });
+
+  const requestNotificationPermission = async () => {
+    if (!("Notification" in window)) return;
+    const permission = await Notification.requestPermission();
+    setNotificationStatus(permission);
+  };
 
   const handleChange = async (key, value) => {
     setSaving((p) => ({ ...p, [key]: true }));
@@ -49,6 +59,26 @@ export default function SettingsScreen({
           {workoutsSyncLocal
             ? "Create the public.workout_logs table in Supabase to enable cloud sync."
             : "All your workout sessions are backed up securely in the cloud."}
+        </div>
+      </div>
+
+      <div style={S.card}>
+        <div style={S.cardLabel}>SYSTEM NOTIFICATIONS</div>
+        <div style={{ marginTop: 10, fontSize: "0.85rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <span style={{ color: notificationStatus === "granted" ? "#10b981" : "#eab308", fontWeight: 600 }}>
+            {notificationStatus === "granted" ? "✓ Enabled" : notificationStatus === "denied" ? "✕ Blocked" : "⚠️ Disabled"}
+          </span>
+          {notificationStatus !== "granted" && notificationStatus !== "unsupported" && (
+            <button
+              style={{ ...S.btn, width: "auto", margin: 0, padding: "8px 12px", background: "#0c4a6e", border: "1px solid #38bdf8", color: "#38bdf8", fontSize: "0.75rem", borderRadius: 6 }}
+              onClick={requestNotificationPermission}
+            >
+              ENABLE
+            </button>
+          )}
+        </div>
+        <div style={{ ...S.cardSub, fontSize: "0.75rem", marginTop: 6 }}>
+          Enables alerts when your fast completes or rest timer finishes while in the background.
         </div>
       </div>
 
