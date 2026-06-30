@@ -9,7 +9,7 @@ import SettingsScreen from "./components/SettingsScreen";
 import WorkoutsScreen from "./Workouts";
 import Spinner from "./components/ui/Spinner";
 import { S, css } from "./components/styles";
-import { todayStr, getFastGoal } from "./components/utils";
+import { todayStr, dateStrFromTs, getFastGoal } from "./components/utils";
 
 // ─── SUPABASE CLIENT ──────────────────────────────────────────────────────────
 const supabase = createClient(
@@ -194,7 +194,12 @@ export default function TheOar() {
       setFasts(allFasts.filter((f) => f.end_time != null));
       const activeFastRow = allFasts.find((f) => f.end_time == null);
       if (activeFastRow) {
-        setActiveFast({ startTime: activeFastRow.start_time, goalHours: activeFastRow.goal_hours, id: activeFastRow.id });
+        setActiveFast({
+          startTime: activeFastRow.start_time,
+          goalHours: activeFastRow.goal_hours,
+          id: activeFastRow.id,
+          date: activeFastRow.date,
+        });
       } else {
         setActiveFast(null);
       }
@@ -336,23 +341,30 @@ export default function TheOar() {
     const payload = {
       id: Date.now(),
       user_id: user.id,
-      date: todayStr(),
+      date: dateStrFromTs(startTime),
       start_time: startTime,
       goal_hours: parseInt(goal, 10),
     };
     console.log("[TheOar] fasts insert payload:", JSON.stringify(payload));
     const { data, error } = await supabase.from("fasts").insert(payload).select().single();
     if (error) console.error("[TheOar] fasts insert error:", JSON.stringify(error));
-    if (data) setActiveFast({ startTime: data.start_time, goalHours: parseInt(data.goal_hours, 10), id: data.id });
+    if (data)
+      setActiveFast({
+        startTime: data.start_time,
+        goalHours: parseInt(data.goal_hours, 10),
+        id: data.id,
+        date: data.date,
+      });
   };
 
-  const endFast = async () => {
+  const endFast = async (customEndTime) => {
     if (!activeFast) return;
-    const endTime = Date.now();
-    await supabase.from("fasts").update({ end_time: endTime }).eq("id", activeFast.id);
+    const endTime = customEndTime || Date.now();
+    const completedDate = dateStrFromTs(endTime);
+    await supabase.from("fasts").update({ date: completedDate, end_time: endTime }).eq("id", activeFast.id);
     const completed = {
       id: activeFast.id,
-      date: todayStr(),
+      date: completedDate,
       startTime: activeFast.startTime,
       endTime,
       goalHours: activeFast.goalHours,
@@ -360,7 +372,7 @@ export default function TheOar() {
       end_time: endTime,
       goal_hours: activeFast.goalHours,
     };
-    setFasts((prev) => [completed, ...prev]);
+    setFasts((prev) => [completed, ...prev].sort((a, b) => b.date.localeCompare(a.date)));
     setActiveFast(null);
   };
 
@@ -434,7 +446,7 @@ export default function TheOar() {
               goalHours: parseInt(entry.goal_hours, 10),
             }
           : f
-      )
+      ).sort((a, b) => b.date.localeCompare(a.date))
     );
   };
 
@@ -444,8 +456,9 @@ export default function TheOar() {
   };
 
   const updateFastStartTime = async (newTimestamp) => {
-    await supabase.from("fasts").update({ start_time: newTimestamp }).eq("id", activeFast.id);
-    setActiveFast((prev) => ({ ...prev, startTime: newTimestamp }));
+    const date = dateStrFromTs(newTimestamp);
+    await supabase.from("fasts").update({ date, start_time: newTimestamp }).eq("id", activeFast.id);
+    setActiveFast((prev) => ({ ...prev, date, startTime: newTimestamp }));
   };
 
   const updateFastGoalHours = async (goalHours) => {

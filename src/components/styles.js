@@ -34,8 +34,9 @@ export const S = {
   pillAmber: { color: "#fbbf24", borderColor: "#92400e", background: "#1c1200" },
   pillDim: { color: "#94a3b8", borderColor: "#334155", background: "transparent" },
 
-  fastTimeRow: { display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.9rem", color: "#94a3b8", marginBottom: 8 },
+  fastTimeRow: { display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10, fontSize: "0.9rem", color: "#94a3b8", marginBottom: 8 },
   fastTimeInput: { background: "transparent", border: "none", borderBottom: "1px solid #475569", color: "#f1f5f9", fontSize: "0.9rem", fontFamily: "inherit", padding: "2px 4px", cursor: "pointer", outline: "none", width: 90 },
+  fastDateTimeInput: { width: 185 },
 
   waterBtns: { display: "flex", gap: 8, marginTop: 12 },
   waterBtn: { flex: 1, background: "#0d1b2a", border: "1px solid #1e3a5f", borderRadius: 8, padding: "10px 0", color: "#38bdf8", fontSize: "0.85rem", fontWeight: 700, cursor: "pointer", fontFamily: "inherit" },

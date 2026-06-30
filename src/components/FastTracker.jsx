@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { S } from "./styles";
-import { todayStr, formatDuration } from "./utils";
+import { todayStr, dateStrFromTs, formatDuration } from "./utils";
 import ProgressBar from "./ui/ProgressBar";
 
 function calcStreak(fasts) {
@@ -46,33 +46,22 @@ export default function FastTracker({
     return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
   };
   const [customStartInput, setCustomStartInput] = useState(nowTimeStr);
+  const [customStartDate, setCustomStartDate] = useState(todayStr);
+  const [endFastInput, setEndFastInput] = useState(() => {
+    const d = new Date();
+    const pad = (n) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  });
 
   const tsToTimeStr = (ts) => {
     const d = new Date(ts);
     return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
   };
 
-  const handleStart = async () => {
-    setStarting(true);
-    const [h, m] = customStartInput.split(":").map(Number);
-    const d = new Date();
-    d.setHours(h, m, 0, 0);
-    await startFast(d.getTime());
-    setStarting(false);
-  };
-
-  const handleEnd = async () => {
-    setEnding(true);
-    await endFast();
-    setEnding(false);
-  };
-
-  const startTimeValue = activeFast ? tsToTimeStr(activeFast.startTime) : "";
-  const handleStartTimeChange = (e) => {
-    const [h, m] = e.target.value.split(":").map(Number);
-    const d = new Date(activeFast.startTime);
-    d.setHours(h, m, 0, 0);
-    updateFastStartTime(d.getTime());
+  const dateTimeToTs = (dateStr, timeStr) => {
+    const [year, month, day] = dateStr.split("-").map(Number);
+    const [h, m] = timeStr.split(":").map(Number);
+    return new Date(year, month - 1, day, h, m, 0, 0).getTime();
   };
 
   const toDateTimeLocal = (ts) => {
@@ -81,10 +70,30 @@ export default function FastTracker({
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
   };
 
+  const handleStart = async () => {
+    setStarting(true);
+    await startFast(dateTimeToTs(customStartDate, customStartInput));
+    setEndFastInput(toDateTimeLocal(Date.now()));
+    setStarting(false);
+  };
+
+  const handleEnd = async () => {
+    const endTs = endFastInput ? new Date(endFastInput).getTime() : Date.now();
+    if (!Number.isFinite(endTs) || endTs <= activeFast.startTime) return;
+    setEnding(true);
+    await endFast(endTs);
+    setEnding(false);
+  };
+
+  const startTimeValue = activeFast ? toDateTimeLocal(activeFast.startTime) : "";
+  const handleStartTimeChange = (e) => {
+    updateFastStartTime(new Date(e.target.value).getTime());
+  };
+
   const handleEndTimeChange = (e) => {
     const newEndTs = new Date(e.target.value).getTime();
     const newGoalHours = (newEndTs - activeFast.startTime) / 3600000;
-    if (newGoalHours > 0) updateFastGoalHours(newGoalHours);
+    if (newGoalHours > 0) updateFastGoalHours(Math.round(newGoalHours));
   };
 
   const openEditFast = (f) =>
@@ -96,18 +105,13 @@ export default function FastTracker({
     });
 
   const handleSaveFast = async () => {
-    const startD = new Date(editFast.startDateTime);
-    const newStartTime = startD.getTime();
+    const newStartTime = new Date(editFast.startDateTime).getTime();
     const newEndTime = new Date(editFast.endDateTime).getTime();
-    
-    // Derive correct database date column from start date
-    const pad = (n) => String(n).padStart(2, "0");
-    const newDateStr = `${startD.getFullYear()}-${pad(startD.getMonth() + 1)}-${pad(startD.getDate())}`;
 
     setModalSaving(true);
     await updateFast({
       ...editFast,
-      date: newDateStr,
+      date: dateStrFromTs(newEndTime),
       start_time: newStartTime,
       end_time: newEndTime,
       goal_hours: parseInt(editFast.goalHoursStr, 10) || editFast.goalHours,
@@ -125,6 +129,8 @@ export default function FastTracker({
 
   // Determine weekend status
   const currentIsWeekend = isWeekend ? isWeekend() : new Date().getDay() === 0 || new Date().getDay() === 6;
+  const endFastTs = endFastInput ? new Date(endFastInput).getTime() : NaN;
+  const canEndFast = activeFast ? Number.isFinite(endFastTs) && endFastTs > activeFast.startTime : true;
 
   return (
     <>
@@ -206,10 +212,10 @@ export default function FastTracker({
                 <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
                   🕐 Started
                   <input
-                    type="time"
+                    type="datetime-local"
                     value={startTimeValue}
                     onChange={handleStartTimeChange}
-                    style={S.fastTimeInput}
+                    style={{ ...S.fastTimeInput, ...S.fastDateTimeInput, colorScheme: "dark" }}
                   />
                 </span>
                 <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -218,15 +224,24 @@ export default function FastTracker({
                     type="datetime-local"
                     value={toDateTimeLocal(activeFast.startTime + fastGoal * 3600000)}
                     onChange={handleEndTimeChange}
-                    style={{ ...S.fastTimeInput, colorScheme: "dark" }}
+                    style={{ ...S.fastTimeInput, ...S.fastDateTimeInput, colorScheme: "dark" }}
                   />
                 </span>
+              </div>
+              <div style={S.inputGroup}>
+                <label style={S.inputLabel}>END FAST AT</label>
+                <input
+                  style={{ ...S.input, colorScheme: "dark" }}
+                  type="datetime-local"
+                  value={endFastInput}
+                  onChange={(e) => setEndFastInput(e.target.value)}
+                />
               </div>
               <div style={{ ...S.cardSub, textAlign: "center", marginBottom: 12 }}>
                 {fastDone ? "🎯 Goal reached!" : `${((fastGoal * 3600000 - fastElapsed) / 3600000).toFixed(1)}h remaining`}
               </div>
               <ProgressBar pct={fastPct} color={fastDone ? "#4ade80" : "#f59e0b"} thick />
-              <button style={{ ...S.btn, ...S.btnDanger, marginTop: 16 }} onClick={handleEnd} disabled={ending}>
+              <button style={{ ...S.btn, ...S.btnDanger, marginTop: 16 }} onClick={handleEnd} disabled={ending || !canEndFast}>
                 {ending ? "SAVING..." : "END FAST"}
               </button>
             </>
@@ -234,6 +249,15 @@ export default function FastTracker({
             <>
               <div style={{ ...S.bigNumDim, textAlign: "center" }}>NOT STARTED</div>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+                <div style={S.inputGroup}>
+                  <label style={S.inputLabel}>START DATE</label>
+                  <input
+                    style={{ ...S.input, colorScheme: "dark" }}
+                    type="date"
+                    value={customStartDate}
+                    onChange={(e) => setCustomStartDate(e.target.value)}
+                  />
+                </div>
                 <div style={S.inputGroup}>
                   <label style={S.inputLabel}>START TIME</label>
                   <input
